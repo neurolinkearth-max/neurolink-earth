@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>NeuroLink Earth App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --quantum-primary: #00ff88;
+    --quantum-secondary: #0099ff;
+    --quantum-dark: #0a0a1a;
+    --quantum-glow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--quantum-dark);
+    color: white;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.app-container { max-width: 100%; min-height: 100vh; background: linear-gradient(135deg, #0a0a1a 0%, #001122 100%); }
+
+.app-header {
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(20px);
+    padding: 15px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(0,255,136,0.3);
+}
+
+.header-content { display: flex; justify-content: space-between; align-items: center; }
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(45deg, var(--quantum-primary), var(--quantum-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard { padding: 80px 15px 20px; }
+
+.welcome-card {
+    background: rgba(0,255,136,0.1);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(0,255,136,0.3);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.metric-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.metric-value { font-size: 24px; font-weight: bold; color: var(--quantum-primary); margin: 5px 0; }
+
+.floating-action-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--quantum-primary), var(--quantum-secondary));
+    border: none;
+    color: white;
+    font-size: 24px;
+    box-shadow: var(--quantum-glow);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.tab-bar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-top: 1px solid rgba(0,255,136,0.3);
+}
+
+.tab-item { text-align: center; padding: 10px; flex: 1; cursor: pointer; }
+.tab-icon { font-size: 20px; margin-bottom: 5px; }
+
+@keyframes quantum-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.quantum-animation { animation: quantum-pulse 2s infinite; }
+
+@media (max-width: 480px) {
+    .metrics-grid { grid-template-columns: 1fr; }
+    .dashboard { padding: 70px 10px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo">🧠 NeuroLink</div>
+            <div class="user-avatar">👤</div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="welcome-card">
+            <h1>Bem-vindo, Visionário! 👋</h1>
+            <p>Seu cérebro está operando em 97% de eficiência quântica</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div>Foco Neural</div>
+                <div class="metric-value" id="focus">94%</div>
+                <div>+12% hoje</div>
+            </div>
+            <div class="metric-card">
+                <div>Produtividade</div>
+                <div class="metric-value" id="productivity">87%</div>
+                <div>Ótimo nível</div>
+            </div>
+            <div class="metric-card">
+                <div>Batimentos</div>
+                <div class="metric-value" id="heartRate">68 BPM</div>
+                <div>Estado zen</div>
+            </div>
+            <div class="metric-card">
+                <div>Energia</div>
+                <div class="metric-value" id="energy">92%</div>
+                <div>Alta vibração</div>
+            </div>
+        </div>
+
+        <div class="app-section">
+            <h3>📈 Análise Neural em Tempo Real</h3>
+            <canvas id="neuralChart" width="300" height="200"></canvas>
+        </div>
+
+        <div class="app-section">
+            <h3>⚡ Otimizações Quânticas</h3>
+            <div class="optimization-list">
+                <div class="optimization-item">🧠 Neuroplasticidade Ativada</div>
+                <div class="optimization-item">🌌 Conexão Multidimensional</div>
+                <div class="optimization-item">⚡ Velocidade de Pensamento +300%</div>
+            </div>
+        </div>
+    </main>
+
+    <button class="floating-action-btn quantum-animation" id="quantumBtn">+</button>
+
+    <nav class="tab-bar">
+        <div class="tab-item"><div class="tab-icon">📊</div>Dashboard</div>
+        <div class="tab-item"><div class="tab-icon">🧠</div>Neural</div>
+        <div class="tab-item"><div class="tab-icon">🌌</div>Quantum</div>
+        <div class="tab-item"><div class="tab-icon">⚙️</div>Settings</div>
+    </nav>
+</div>
+
+<script>
+class NeuroLinkApp {
+    constructor() {
+        this.initCharts();
+        this.simulateMetrics();
+        this.setupEventListeners();
+        this.setupSwipeGestures();
+    }
+
+    initCharts() {
+        const ctx = document.getElementById('neuralChart').getContext('2d');
+        this.neuralChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => i + 'h'),
+                datasets: [{
+                    label: 'Atividade Neural',
+                    data: Array.from({length: 24}, () => Math.random() * 100),
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0,255,136,0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    simulateMetrics() {
+        setInterval(() => {
+            const focus = Math.round(80 + Math.random() * 20);
+            const heart = Math.round(60 + Math.random() * 20);
+            const energy = Math.round(70 + Math.random() * 25);
+            document.getElementById('focus').innerText = focus + '%';
+            document.getElementById('heartRate').innerText = heart + ' BPM';
+            document.getElementById('energy').innerText = energy + '%';
+        }, 2000);
+    }
+
+    setupEventListeners() {
+        document.getElementById('quantumBtn').addEventListener('click', () => this.activateQuantumMode());
+    }
+
+    activateQuantumMode() {
+        const overlay = document.createElement('div');
+        overlay.innerHTML = `
+            <div style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index:10000; display:flex; align-items:center; justify-content:center;">
+                <div style="background: linear-gradient(45deg, #0a0a1a, #001122); padding:30px; border-radius:20px; border:2px solid #00ff88; text-align:center;">
+                    <h2>🌌 MODO QUÂNTICO ATIVADO</h2>
+                    <p>Consciência expandida para dimensões superiores</p>
+                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px; padding:10px 20px; background:#00ff88; border:none; border-radius:10px;">Fechar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    setupSwipeGestures() {
+        let startX, startY;
+        document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+        document.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            const diffX = endX - startX;
+            if(Math.abs(diffX) > 50){
+                console.log(diffX > 0 ? 'Swipe direito' : 'Swipe esquerdo');
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new NeuroLinkApp();
+});
+</script>
+
+</body>
+</html>
